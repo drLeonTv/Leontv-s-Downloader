@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "LeonTV Downloader",
+  "version": "1.0.0",
+  "description": "Stößt Downloads unterstützter YouTube-Videos und Twitch-VODs in der lokalen Desktop-App an.",
+  "permissions": ["activeTab"],
+  "host_permissions": ["http://127.0.0.1:8765/*"],
+  "action": {
+    "default_title": "LeonTV Downloader",
+    "default_popup": "popup.html"
+  }
+}

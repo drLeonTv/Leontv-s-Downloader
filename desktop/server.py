@@ -1,4 +1,5 @@
 import threading
+import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
@@ -6,17 +7,22 @@ from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import run_in_threadpool
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-from desktop.downloader import download_video, get_video_info, validate_video_url
+from desktop.downloader import (
+    build_download_options,
+    download_video,
+    get_video_info,
+    validate_video_url,
+)
 
 
 class DownloadRequest(BaseModel):
-    url: str
-    format: str
-    quality: str | None = None
-    start: str | None = None
-    end: str | None = None
+    url: str = Field(min_length=1, max_length=2048)
+    format: str = Field(min_length=1, max_length=8)
+    quality: str | None = Field(default=None, max_length=4)
+    start: str | None = Field(default=None, max_length=16)
+    end: str | None = Field(default=None, max_length=16)
 
 
 class DownloadManager:
@@ -33,6 +39,7 @@ class DownloadManager:
         job = {
             "id": uuid.uuid4().hex,
             "title": video_info["title"],
+            "thumbnail": video_info.get("thumbnail"),
             "url": request.url,
             "format": request.format.upper(),
             "status": "queued",
@@ -79,6 +86,8 @@ class DownloadManager:
 
 
 manager = DownloadManager()
+_info_cache = {}
+_info_cache_lock = threading.Lock()
 app = FastAPI(title="LeonTV Downloader", docs_url=None, redoc_url=None)
 app.add_middleware(
     CORSMiddleware,
@@ -86,6 +95,25 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["content-type"],
 )
+
+
+def cached_video_info(url):
+    with _info_cache_lock:
+        cached = _info_cache.get(url)
+        if cached and time.monotonic() - cached[0] < 600:
+            return cached[1]
+    info = get_video_info(url)
+    with _info_cache_lock:
+        expired = [
+            key for key, (created, _value) in _info_cache.items()
+            if time.monotonic() - created >= 600
+        ]
+        for key in expired:
+            _info_cache.pop(key, None)
+        if len(_info_cache) >= 100:
+            _info_cache.pop(next(iter(_info_cache)))
+        _info_cache[url] = (time.monotonic(), info)
+    return info
 
 
 @app.get("/api/health")
@@ -97,7 +125,7 @@ def health():
 async def video_info(url: str):
     try:
         validate_video_url(url)
-        return await run_in_threadpool(get_video_info, url)
+        return await run_in_threadpool(cached_video_info, url)
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
     except Exception as error:
@@ -105,14 +133,15 @@ async def video_info(url: str):
 
 
 @app.post("/api/download", status_code=202)
-def start_download(request: DownloadRequest):
+async def start_download(request: DownloadRequest):
     try:
         validate_video_url(request.url)
         if request.format not in {"mp4", "mp3"}:
             raise ValueError("Das Ausgabeformat muss MP4 oder MP3 sein.")
-        info = {"title": request.url}
-        manager.add(request, info)
-        return {"id": manager.snapshot()[0]["id"], "status": "queued"}
+        info = await run_in_threadpool(cached_video_info, request.url)
+        build_download_options(request.model_dump(), info, lambda _data: None)
+        job = manager.add(request, info)
+        return {"id": job["id"], "status": "queued"}
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
 

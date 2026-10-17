@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LeonTV Downloader</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="brand-mark">L</div>
+        <div>
+          <h1>LeonTV Downloader</h1>
+          <p>YouTube &amp; Twitch VODs</p>
+        </div>
+      </header>
+      <div id="message" class="message" role="status">Video wird erkannt…</div>
+      <section id="download-form" hidden>
+        <label for="video-url">Video</label>
+        <input id="video-url" type="text" readonly>
+        <div id="video-title" class="video-title"></div>
+
+        <div class="row">
+          <div class="field">
+            <label for="format">Format</label>
+            <select id="format">
+              <option value="mp4">MP4 · Video</option>
+              <option value="mp3">MP3 · Audio</option>
+            </select>
+          </div>
+          <div class="field" id="quality-field">
+            <label for="quality">Qualität</label>
+            <select id="quality"></select>
+          </div>
+        </div>
+        <p id="estimate" class="estimate"></p>
+
+        <section id="clip-fields" hidden>
+          <h2>Twitch-Ausschnitt</h2>
+          <div class="row">
+            <div class="field">
+              <label for="clip-start">Start · HH:MM:SS</label>
+              <input id="clip-start" type="text" placeholder="01:15:00">
+            </div>
+            <div class="field">
+              <label for="clip-end">Ende · HH:MM:SS</label>
+              <input id="clip-end" type="text" placeholder="01:20:30">
+            </div>
+          </div>
+        </section>
+        <button id="download" type="button">Download starten</button>
+      </section>
+      <footer>Verbindung zur Desktop-App: <span id="connection">wird geprüft</span></footer>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,12 +1,11 @@
+import os
 import re
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 
 DOWNLOAD_DIR = Path(
-    __import__("os").environ.get(
-        "LEONTV_DOWNLOAD_DIR", str(Path.home() / "Downloads" / "LeonTV-Downloader")
-    )
+    os.environ.get("LEONTV_DOWNLOAD_DIR", str(Path.home() / "Downloads" / "LeonTV-Downloader"))
 ).expanduser()
 SUPPORTED_HOSTS = {
     "youtube.com",
@@ -23,12 +22,16 @@ TIMESTAMP_PATTERN = re.compile(r"^(?:(\d{1,3}):)?([0-5]?\d):([0-5]?\d)$")
 
 def validate_video_url(url):
     parsed = urlparse(url)
+    try:
+        port = parsed.port
+    except ValueError as error:
+        raise ValueError("Ungültiger Port in der Video-URL.") from error
     if (
         parsed.scheme != "https"
         or parsed.hostname not in SUPPORTED_HOSTS
         or parsed.username
         or parsed.password
-        or parsed.port not in (None, 443)
+        or port not in (None, 443)
     ):
         raise ValueError("Bitte eine gültige YouTube- oder Twitch-Video-URL eingeben.")
     if parsed.hostname in {"twitch.tv", "www.twitch.tv", "m.twitch.tv"}:
@@ -38,7 +41,7 @@ def validate_video_url(url):
         if not parsed.path.strip("/"):
             raise ValueError("Die URL enthält keine YouTube-Video-ID.")
     elif not (
-        parsed.path == "/watch" and bool(__import__("urllib.parse", fromlist=["parse_qs"]).parse_qs(parsed.query).get("v"))
+        parsed.path == "/watch" and bool(parse_qs(parsed.query).get("v"))
         or re.match(r"^/(?:shorts|live|embed)/[^/]+/?$", parsed.path)
     ):
         raise ValueError("Die URL enthält kein unterstütztes YouTube-Video.")
@@ -73,7 +76,7 @@ def _format_size(size):
 
 def _yt_dlp_options():
     options = {"quiet": True, "no_warnings": True, "noplaylist": True}
-    ffmpeg_location = __import__("os").environ.get("FFMPEG_LOCATION")
+    ffmpeg_location = os.environ.get("FFMPEG_LOCATION")
     if ffmpeg_location:
         options["ffmpeg_location"] = ffmpeg_location
     return options
@@ -89,7 +92,7 @@ def get_video_info(url):
     video_formats = [
         item
         for item in info.get("formats", [])
-        if item.get("height") and item.get("vcodec") != "none"
+        if item.get("height") and item.get("vcodec") != "none" and item.get("ext") == "mp4"
     ]
     audio_formats = [
         item for item in info.get("formats", []) if item.get("acodec") != "none"
@@ -127,6 +130,7 @@ def get_video_info(url):
         "thumbnail": info.get("thumbnail"),
         "qualities": qualities,
         "mp3_size_mb": mp3_size,
+        "mp4_available": bool(video_formats),
     }
 
 
@@ -134,6 +138,8 @@ def build_download_options(request, video_info, on_progress):
     media_format = request["format"]
     if media_format not in {"mp4", "mp3"}:
         raise ValueError("Das Ausgabeformat muss MP4 oder MP3 sein.")
+    if media_format == "mp4" and not video_info.get("mp4_available", True):
+        raise ValueError("Für dieses Video wurde kein MP4-Format gefunden.")
     options = {
         **_yt_dlp_options(),
         "outtmpl": str(DOWNLOAD_DIR / "%(title).180B [%(id)s].%(ext)s"),
@@ -162,7 +168,7 @@ def build_download_options(request, video_info, on_progress):
             {
                 "format": (
                     f"bestvideo{limit}[ext=mp4]+bestaudio[ext=m4a]/"
-                    f"best{limit}[ext=mp4]/best{limit}"
+                    f"best{limit}[ext=mp4]"
                 ),
                 "merge_output_format": "mp4",
             }
