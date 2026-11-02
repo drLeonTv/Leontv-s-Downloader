@@ -84,57 +84,93 @@ class DownloaderWindow(ctk.CTk):
         self.title(APP_NAME)
         self.geometry("760x590")
         self.minsize(620, 470)
-        self.configure(fg_color="#10141c")
+        self.configure(fg_color="#0b0e16")
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
         self._tray = None
         self._closing = False
         self._thumbnail_url = None
         self._thumbnail_image = None
+        self._history_signature = None
 
         header = ctk.CTkFrame(self, fg_color="transparent")
-        header.pack(fill="x", padx=28, pady=(22, 8))
-        ctk.CTkLabel(
-            header, text="LeonTV Downloader", font=ctk.CTkFont(size=25, weight="bold")
-        ).pack(side="left")
-        self.status_label = ctk.CTkLabel(
-            header, text="Lokalserver wird gestartet…", text_color="#9ba8bc"
+        header.pack(fill="x", padx=28, pady=(22, 10))
+        brand = ctk.CTkFrame(
+            header, width=46, height=46, corner_radius=15, fg_color="#705ff5"
         )
-        self.status_label.pack(side="right")
-
-        self.current_card = ctk.CTkFrame(self, corner_radius=16, fg_color="#1a2230")
-        self.current_card.pack(fill="x", padx=28, pady=10)
+        brand.pack(side="left", padx=(0, 12))
+        brand.pack_propagate(False)
         ctk.CTkLabel(
-            self.current_card, text="AKTUELLER DOWNLOAD", text_color="#8f9db3",
-            font=ctk.CTkFont(size=11, weight="bold")
-        ).pack(anchor="w", padx=18, pady=(16, 4))
+            brand, text="L", text_color="white",
+            font=ctk.CTkFont(size=24, weight="bold")
+        ).pack(expand=True)
+        heading = ctk.CTkFrame(header, fg_color="transparent")
+        heading.pack(side="left")
+        ctk.CTkLabel(
+            heading, text="LeonTV Downloader",
+            font=ctk.CTkFont(size=22, weight="bold")
+        ).pack(anchor="w")
+        ctk.CTkLabel(
+            heading, text="Deine Downloads. Ein klarer Überblick.",
+            text_color="#8e98ad", font=ctk.CTkFont(size=11)
+        ).pack(anchor="w", pady=(2, 0))
+        self.status_label = ctk.CTkLabel(
+            header, text="●  STARTET", text_color="#b7aaff",
+            fg_color="#19172d", corner_radius=12,
+            font=ctk.CTkFont(size=10, weight="bold")
+        )
+        self.status_label.pack(side="right", padx=(8, 0), pady=8)
+
+        self.current_card = ctk.CTkFrame(
+            self, corner_radius=18, fg_color="#141925",
+            border_width=1, border_color="#272e40"
+        )
+        self.current_card.pack(fill="x", padx=28, pady=(8, 16))
+        ctk.CTkLabel(
+            self.current_card, text="IN ARBEIT", text_color="#a49aff",
+            font=ctk.CTkFont(size=10, weight="bold")
+        ).pack(anchor="w", padx=18, pady=(16, 5))
         current_row = ctk.CTkFrame(self.current_card, fg_color="transparent")
         current_row.pack(fill="x", padx=18, pady=4)
-        self.thumbnail = ctk.CTkLabel(current_row, text="", width=100, height=56)
-        self.thumbnail.pack(side="left", padx=(0, 12))
+        self.thumbnail = ctk.CTkLabel(
+            current_row, text="▶", width=104, height=60,
+            corner_radius=11, fg_color="#20263a",
+            text_color="#9d91ff", font=ctk.CTkFont(size=22)
+        )
+        self.thumbnail.pack(side="left", padx=(0, 14))
         self.current_title = ctk.CTkLabel(
             current_row, text="Keine aktiven Downloads", anchor="w",
-            font=ctk.CTkFont(size=16, weight="bold"), wraplength=550
+            font=ctk.CTkFont(size=16, weight="bold"), wraplength=540
         )
         self.current_title.pack(side="left", fill="x", expand=True)
-        self.progress = ctk.CTkProgressBar(self.current_card, progress_color="#5b8cff")
-        self.progress.pack(fill="x", padx=18, pady=8)
+        self.progress = ctk.CTkProgressBar(
+            self.current_card, height=8, corner_radius=8,
+            fg_color="#272d3d", progress_color="#8271ff"
+        )
+        self.progress.pack(fill="x", padx=18, pady=(12, 8))
         self.progress.set(0)
         self.progress_label = ctk.CTkLabel(
-            self.current_card, text="Warte auf einen Download…", text_color="#9ba8bc"
+            self.current_card, text="Warte auf deinen nächsten Download",
+            text_color="#8e98ad", font=ctk.CTkFont(size=11)
         )
         self.progress_label.pack(anchor="w", padx=18, pady=(0, 16))
 
         history_header = ctk.CTkFrame(self, fg_color="transparent")
-        history_header.pack(fill="x", padx=28, pady=(18, 6))
+        history_header.pack(fill="x", padx=28, pady=(2, 9))
         ctk.CTkLabel(
-            history_header, text="Letzte Downloads", font=ctk.CTkFont(size=18, weight="bold")
+            history_header, text="Deine Mediathek",
+            font=ctk.CTkFont(size=17, weight="bold")
         ).pack(side="left")
         ctk.CTkButton(
-            history_header, text="Downloads-Ordner öffnen", width=160,
+            history_header, text="Ordner öffnen", width=126, height=32,
+            corner_radius=10, fg_color="#20263a", hover_color="#2b334b",
+            font=ctk.CTkFont(size=11, weight="bold"),
             command=self._open_download_folder
         ).pack(side="right")
-        self.history = ctk.CTkScrollableFrame(self, corner_radius=14, fg_color="#1a2230")
+        self.history = ctk.CTkScrollableFrame(
+            self, corner_radius=16, fg_color="#111621",
+            border_width=1, border_color="#22293a"
+        )
         self.history.pack(fill="both", expand=True, padx=28, pady=(0, 18))
         self.protocol("WM_DELETE_WINDOW", self._hide)
 
@@ -208,30 +244,58 @@ class DownloaderWindow(ctk.CTk):
             self.progress_label.configure(text=details)
         else:
             self.current_title.configure(text="Keine aktiven Downloads")
-            self.thumbnail.configure(image=None)
+            self.thumbnail.configure(image=None, text="▶")
             self._thumbnail_image = None
             self._thumbnail_url = None
             self.progress.set(0)
             self.progress_label.configure(text="Warte auf einen Download…")
 
+        history_items = [job for job in jobs[:20] if job["status"] not in {"queued", "downloading"}]
+        history_signature = tuple(
+            (job["id"], job["status"], job["title"], job["format"], job["error"])
+            for job in history_items
+        )
+        if history_signature != self._history_signature:
+            self._render_history(history_items)
+            self._history_signature = history_signature
+        self.status_label.configure(text="●  ONLINE", text_color="#76d9a8")
+        self.after(1200, self._refresh)
+
+    def _render_history(self, jobs):
         for widget in self.history.winfo_children():
             widget.destroy()
-        for job in jobs[:20]:
-            if job["status"] in {"queued", "downloading"}:
-                continue
-            color = "#80d5a0" if job["status"] == "completed" else "#ff8585"
-            title = job["title"]
-            if job["status"] == "failed":
-                title += f' — {job["error"] or "Fehlgeschlagen"}'
+        if not jobs:
             ctk.CTkLabel(
-                self.history,
-                text=f'{job["format"]}  ·  {title}',
+                self.history, text="Abgeschlossene Downloads erscheinen hier",
+                text_color="#6f7a90", font=ctk.CTkFont(size=12)
+            ).pack(pady=32)
+            return
+        for job in jobs:
+            completed = job["status"] == "completed"
+            color = "#72d6a5" if completed else "#ff879c"
+            title = job["title"]
+            if not completed:
+                title += f' — {job["error"] or "Fehlgeschlagen"}'
+            row = ctk.CTkFrame(
+                self.history, corner_radius=11, fg_color="#171d2a",
+                border_width=1, border_color="#252d3e"
+            )
+            row.pack(fill="x", padx=8, pady=(8, 0))
+            ctk.CTkLabel(
+                row, text="✓" if completed else "!",
                 text_color=color,
-                anchor="w",
-                wraplength=650,
-            ).pack(fill="x", padx=12, pady=7)
-        self.status_label.configure(text=f"Bereit · http://{HOST}:{PORT}")
-        self.after(1200, self._refresh)
+                width=30, font=ctk.CTkFont(size=15, weight="bold")
+            ).pack(side="left", padx=(11, 5), pady=10)
+            ctk.CTkLabel(
+                row, text=title, text_color="#dce2ed",
+                anchor="w", justify="left", wraplength=570,
+                font=ctk.CTkFont(size=11)
+            ).pack(side="left", fill="x", expand=True, padx=(0, 7), pady=9)
+            ctk.CTkLabel(
+                row, text=job["format"], text_color="#9a91ff",
+                fg_color="#25223c", corner_radius=8,
+                font=ctk.CTkFont(size=9, weight="bold")
+            ).pack(side="right", padx=10, pady=8)
 
     def _load_thumbnail(self, url):
         try:

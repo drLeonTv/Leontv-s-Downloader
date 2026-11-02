@@ -8,6 +8,26 @@ const quality = document.querySelector("#quality");
 const qualityField = document.querySelector("#quality-field");
 const estimate = document.querySelector("#estimate");
 const button = document.querySelector("#download");
+const appState = document.querySelector("#app-state");
+const connectionDot = document.querySelector("#connection-dot");
+
+function setConnection(connected) {
+  const label = document.querySelector("#connection");
+  label.textContent = connected ? "verbunden" : "nicht verbunden";
+  connectionDot.classList.toggle("online", connected);
+  connectionDot.classList.toggle("offline", !connected);
+  appState.classList.toggle("offline", !connected);
+  appState.lastChild.textContent = connected ? " VERBUNDEN" : " OFFLINE";
+}
+
+async function checkConnection() {
+  try {
+    const response = await fetch(`${API}/api/health`);
+    setConnection(response.ok);
+  } catch {
+    setConnection(false);
+  }
+}
 
 function showMessage(text, isError = false) {
   message.textContent = text;
@@ -52,14 +72,16 @@ function formatEstimate() {
 
 async function loadCurrentVideo() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  await checkConnection();
   state.url = tab?.url || "";
   state.platform = supportedPage(state.url);
   if (!state.platform) {
     showMessage("Öffne ein YouTube-Video oder ein Twitch-VOD unter /videos/.");
-    document.querySelector("#connection").textContent = "nicht verbunden";
     return;
   }
   document.querySelector("#video-url").value = state.url;
+  document.querySelector("#platform").textContent =
+    state.platform === "twitch" ? "TWITCH VOD" : "YOUTUBE";
   document.querySelector("#clip-fields").hidden = state.platform !== "twitch";
   try {
     const response = await fetch(`${API}/api/info?url=${encodeURIComponent(state.url)}`);
@@ -76,7 +98,7 @@ async function loadCurrentVideo() {
       return option;
     }));
     form.hidden = false;
-    document.querySelector("#connection").textContent = "verbunden";
+    setConnection(true);
     showMessage(
       data.mp4_available
         ? "Video erkannt. Format und Qualität auswählen."
@@ -84,7 +106,7 @@ async function loadCurrentVideo() {
     );
     formatEstimate();
   } catch (error) {
-    document.querySelector("#connection").textContent = "nicht erreichbar";
+    setConnection(false);
     showMessage(
       error instanceof TypeError
         ? "Desktop-App nicht erreichbar. Starte die LeonTV-Desktop-App und öffne das Popup erneut."
