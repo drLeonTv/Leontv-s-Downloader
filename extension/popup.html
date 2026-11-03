@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LeonTV Downloader</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="brand-mark">L</div>
+        <div>
+          <h1>LeonTV Downloader</h1>
+          <p>YouTube &amp; Twitch VODs</p>
+        </div>
+        <div id="app-state" class="live-pill"><span></span> VERBINDE…</div>
+      </header>
+      <div id="message" class="message" role="status">Video wird erkannt…</div>
+      <section id="download-form" hidden>
+        <section class="video-card" aria-label="Erkanntes Video">
+          <div class="video-card-top">
+            <span class="eyebrow">VIDEO ERKANNT</span>
+            <span id="platform" class="platform-pill">VIDEO</span>
+          </div>
+          <div id="video-title" class="video-title"></div>
+          <input id="video-url" type="text" readonly aria-label="Video-URL">
+        </section>
+
+        <section class="options-card" aria-label="Downloadoptionen">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">DEIN DOWNLOAD</span>
+              <h2>Format &amp; Qualität</h2>
+            </div>
+            <span class="section-icon" aria-hidden="true">↓</span>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="format">FORMAT</label>
+              <select id="format">
+                <option value="mp4">MP4 · Video</option>
+                <option value="mp3">MP3 · Audio</option>
+              </select>
+            </div>
+            <div class="field" id="quality-field">
+              <label for="quality">AUFLÖSUNG</label>
+              <select id="quality"></select>
+            </div>
+          </div>
+          <p id="estimate" class="estimate"></p>
+
+          <section id="clip-fields" class="clip-card" hidden>
+            <div class="clip-heading">
+              <span class="clip-icon" aria-hidden="true">✂</span>
+              <div>
+                <h2>Clip schneiden</h2>
+                <p>Nur den gewünschten VOD-Ausschnitt laden</p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label for="clip-start">STARTZEIT</label>
+                <input id="clip-start" type="text" placeholder="01:15:00">
+              </div>
+              <div class="field">
+                <label for="clip-end">ENDZEIT</label>
+                <input id="clip-end" type="text" placeholder="01:20:30">
+              </div>
+            </div>
+          </div>
+          </section>
+          <button id="download" type="button">
+            <span>Download starten</span>
+            <span class="button-arrow" aria-hidden="true">↗</span>
+          </button>
+        </section>
+      </section>
+      <footer>
+        <span class="connection-label"><span id="connection-dot" class="connection-dot"></span> Desktop-App</span>
+        <span id="connection">wird geprüft</span>
+      </footer>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

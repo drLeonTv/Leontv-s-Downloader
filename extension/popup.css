@@ -1,0 +1,203 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, "Segoe UI", sans-serif;
+  background: #0b0e16;
+  color: #f3f5fb;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+body {
+  width: 400px;
+  margin: 0;
+  background:
+    radial-gradient(ellipse at 92% -12%, rgba(108, 91, 255, .2), transparent 42%),
+    #0b0e16;
+}
+main { padding: 22px; }
+header { display: flex; align-items: center; gap: 12px; margin-bottom: 19px; }
+.brand-mark {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 15px;
+  background: linear-gradient(145deg, #a18cff, #6558f5 65%, #5144db);
+  color: white;
+  font-size: 22px;
+  font-weight: 700;
+  box-shadow: 0 8px 22px rgba(101, 88, 245, .3);
+}
+h1 { margin: 0; font-size: 16px; letter-spacing: -.3px; }
+header p { margin: 4px 0 0; color: #8e98ad; font-size: 11px; }
+.live-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 6px 9px;
+  border: 1px solid rgba(99, 212, 165, .16);
+  border-radius: 999px;
+  background: rgba(99, 212, 165, .07);
+  color: #89d9b4;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .8px;
+}
+.live-pill span, .connection-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #5dd6a0;
+  box-shadow: 0 0 10px rgba(93, 214, 160, .6);
+}
+.live-pill.offline { border-color: rgba(255, 124, 142, .16); background: rgba(255, 124, 142, .06); color: #ff9eae; }
+.live-pill.offline span { background: #ff8296; box-shadow: 0 0 10px rgba(255, 130, 150, .5); }
+.message {
+  display: flex;
+  align-items: center;
+  min-height: 39px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(134, 149, 179, .13);
+  border-radius: 11px;
+  background: rgba(22, 27, 40, .78);
+  color: #bac3d4;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.message.error {
+  border-color: rgba(255, 124, 142, .25);
+  background: rgba(75, 35, 48, .32);
+  color: #ff9eae;
+}
+label { display: block; margin: 14px 0 7px; color: #7f8ba3; font-size: 9px; font-weight: 700; letter-spacing: .9px; }
+input, select {
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 11px;
+  border: 1px solid #2a3042;
+  border-radius: 10px;
+  outline: none;
+  background: #111622;
+  color: #edf0f7;
+  font: inherit;
+  font-size: 12px;
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+input:focus, select:focus { border-color: #8a79ff; box-shadow: 0 0 0 3px rgba(138, 121, 255, .12); }
+.video-card, .options-card {
+  border: 1px solid rgba(133, 145, 174, .12);
+  border-radius: 15px;
+  background: linear-gradient(145deg, rgba(24, 29, 43, .96), rgba(17, 21, 32, .96));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .14);
+}
+.video-card { margin-bottom: 12px; padding: 14px; }
+.video-card-top { display: flex; align-items: center; justify-content: space-between; }
+.eyebrow { color: #808ba3; font-size: 9px; font-weight: 700; letter-spacing: 1.1px; }
+.platform-pill {
+  padding: 5px 8px;
+  border: 1px solid rgba(160, 142, 255, .17);
+  border-radius: 999px;
+  background: rgba(126, 104, 255, .1);
+  color: #b6a8ff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .55px;
+}
+.video-title { margin: 11px 0 1px; font-size: 14px; font-weight: 650; letter-spacing: -.2px; line-height: 1.4; }
+.video-card input {
+  min-height: 30px;
+  margin-top: 9px;
+  padding: 5px 8px;
+  border-color: transparent;
+  background: rgba(8, 11, 18, .35);
+  color: #7f8ba2;
+  font-size: 10px;
+}
+.options-card { padding: 16px; }
+.section-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+.section-heading h2, .clip-heading h2 { margin: 5px 0 0; font-size: 14px; letter-spacing: -.2px; }
+.section-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgba(138, 121, 255, .17);
+  border-radius: 10px;
+  background: rgba(138, 121, 255, .09);
+  color: #b6a8ff;
+  font-size: 16px;
+}
+.row { display: flex; gap: 11px; }
+.field { flex: 1; min-width: 0; }
+.estimate {
+  min-height: 16px;
+  margin: 10px 0 2px;
+  color: #a29aff;
+  font-size: 10px;
+  font-weight: 600;
+}
+#clip-fields {
+  margin: 14px 0 14px;
+  padding: 12px;
+  border: 1px solid rgba(174, 102, 255, .17);
+  border-radius: 12px;
+  background: linear-gradient(125deg, rgba(119, 70, 177, .12), rgba(75, 62, 142, .08));
+}
+.clip-heading { display: flex; align-items: center; gap: 9px; }
+.clip-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  place-items: center;
+  border-radius: 9px;
+  background: rgba(173, 130, 255, .15);
+  color: #c0a3ff;
+  font-size: 14px;
+}
+.clip-heading h2 { margin: 0; font-size: 12px; }
+.clip-heading p { margin: 3px 0 0; color: #8d87a8; font-size: 9px; }
+#clip-fields .row { gap: 9px; }
+#clip-fields label { margin-top: 12px; }
+button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 46px;
+  margin-top: 13px;
+  border: 0;
+  border-radius: 11px;
+  background: linear-gradient(105deg, #8270ff, #6757ed 62%, #5e57de);
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(103, 87, 237, .23);
+  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+}
+button:hover { filter: brightness(1.09); box-shadow: 0 10px 24px rgba(103, 87, 237, .34); transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+button:focus-visible { outline: 2px solid #c1b7ff; outline-offset: 3px; }
+button:disabled { cursor: wait; opacity: .55; transform: none; }
+.button-arrow { font-size: 15px; }
+footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  color: #7d879c;
+  font-size: 10px;
+}
+.connection-label { display: flex; align-items: center; gap: 7px; }
+.connection-dot { width: 6px; height: 6px; background: #78839a; box-shadow: none; }
+.connection-dot.online { background: #5dd6a0; box-shadow: 0 0 9px rgba(93, 214, 160, .55); }
+.connection-dot.offline { background: #ff8296; box-shadow: 0 0 9px rgba(255, 130, 150, .45); }
+#connection { color: #aab3c4; }
