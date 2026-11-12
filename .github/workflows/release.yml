@@ -1,0 +1,90 @@
+name: Build downloads
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  desktop:
+    name: Desktop (${{ matrix.platform }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-latest
+            platform: windows
+            tray_backend: _win32
+          - runner: macos-latest
+            platform: macos
+            tray_backend: _darwin
+          - runner: ubuntu-latest
+            platform: linux
+            tray_backend: _xorg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r desktop/requirements.txt pyinstaller
+      - name: Build desktop app
+        run: >-
+          python -m PyInstaller --noconfirm --clean --windowed
+          --name LeonTV-Downloader
+          --paths .
+          --collect-all customtkinter
+          --hidden-import desktop.server
+          --hidden-import desktop.downloader
+          --hidden-import pystray.${{ matrix.tray_backend }}
+          desktop/app.py
+      - name: Archive desktop app (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Compress-Archive -Path dist/LeonTV-Downloader -DestinationPath dist/LeonTV-Downloader-windows.zip
+      - name: Archive desktop app (macOS)
+        if: runner.os == 'macOS'
+        run: ditto -c -k --sequesterRsrc --keepParent dist/LeonTV-Downloader.app dist/LeonTV-Downloader-macos.zip
+      - name: Archive desktop app (Linux)
+        if: runner.os == 'Linux'
+        run: cd dist && zip -r LeonTV-Downloader-linux.zip LeonTV-Downloader
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.platform }}
+          path: dist/LeonTV-Downloader-${{ matrix.platform }}.zip
+
+  extension:
+    name: Package browser extension
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package extension
+        run: cd extension && zip -r ../LeonTV-Downloader-Chrome.zip .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: browser-extension
+          path: LeonTV-Downloader-Chrome.zip
+
+  release:
+    name: Publish release downloads
+    if: github.ref_type == 'tag'
+    needs: [desktop, extension]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: release-assets/*.zip
