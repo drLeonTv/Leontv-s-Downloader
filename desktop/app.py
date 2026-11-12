@@ -27,6 +27,8 @@ APP_NAME = "LeonTV Downloader"
 
 
 def _startup_command():
+    if getattr(sys, "frozen", False):
+        return [sys.executable, "--background"]
     return [sys.executable, str(Path(__file__).resolve()), "--background"]
 
 
